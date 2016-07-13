@@ -3,23 +3,40 @@ using System.Collections;
 
 public class Cannon001 : MonoBehaviour {
 
-    public GameObject Bolas;
+    public GameObject Bola;
     Transform CannonTrans;
-    Vector3 BocaCannon;
+    Transform BallSpawnPoint;
+    float DeadZone;
+
 	// Use this for initialization
     void Start()
     {
+        DeadZone = .1f;
         CannonTrans = GameObject.FindGameObjectWithTag("Cannon").transform;
-        BocaCannon = GameObject.Find("Cannon001/Mouth").transform.position;
+        BallSpawnPoint = GameObject.FindGameObjectWithTag("Ball Spawn Point").transform;
 	}
 	
 	// Update is called once per frame
-	void Update () {
-        if (Input.GetKeyDown(KeyCode.C))
+    void FixedUpdate()
+    {
+
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            Instantiate(Bolas, BocaCannon, Quaternion.identity);
-
-
+            Instantiate(Bola, BallSpawnPoint.position, Quaternion.identity);
         }
-	}
+
+        if (Input.GetAxis("Horizontal") > DeadZone || Input.GetAxis("Horizontal") < -DeadZone)
+        {
+            CannonTrans.Rotate(new Vector3(0, Input.GetAxis("Horizontal"), 0), Space.World);
+        }
+
+        if ((Input.GetAxis("Vertical") > DeadZone && CannonTrans.rotation.eulerAngles.x > 45) || (Input.GetAxis("Vertical") < -DeadZone && CannonTrans.localRotation.eulerAngles.x > 2))
+        {
+            CannonTrans.Rotate(new Vector3(Input.GetAxis("Vertical"), 0, 0));
+        }
+
+
+
+    }
+
 }

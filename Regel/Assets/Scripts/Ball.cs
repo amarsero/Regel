@@ -2,40 +2,28 @@
 using System.Collections;
 
 public class Ball : MonoBehaviour {
-    Rigidbody rigid;
-    Transform CannonTrans;
-    bool Fire;
-    GameObject Cube;
 
+    Rigidbody rigid;
+    Vector3 ExplosionPoint;
+    float tiempoDeVida;
 	// Use this for initialization
 	void Start () 
     {
+        tiempoDeVida = 15;
         rigid = GetComponent<Rigidbody>();
-
-        CannonTrans = GameObject.FindGameObjectWithTag("Cannon").transform;
+        ExplosionPoint = GameObject.FindGameObjectWithTag("Explosion").transform.position;
 	}
 	
 	// Update is called once per frame
 	void FixedUpdate () 
     {
-	    
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Fire = true;
-        }
-        if (Fire == true)
-        {
-            rigid.AddExplosionForce(3000 * 5 * 10, CannonTrans.position + CannonTrans.rotation * new Vector3(0, 1, 0), 5);
-            if (Cube != null)
-            {
-                Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                Cube.transform.position = CannonTrans.position + CannonTrans.rotation * new Vector3(0, 1, 0);
-                Cube.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-            }
-        }
-        
+	   rigid.AddExplosionForce(1200, ExplosionPoint, 5);
+
+       tiempoDeVida -= Time.deltaTime;
+
+       if (tiempoDeVida <= 0) Destroy(gameObject);
 	}
 
-
+  
     
 }

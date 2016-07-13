@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - Cannon
+  - Ball
+  - Ball Spawn Point
+  - Explosion
+  - Brick
   layers:
   - Default
   - TransparentFX
