@@ -104,11 +104,9 @@ public class Wall : MonoBehaviour {
             ladrillo.AddComponent<Rigidbody>().mass = 4;
             Bricks[posicion] = null;
 
+     ///aplicar impulso y propagar a ladrillos lindantes
 
-            for (int x = 3; x < posicion.x ; x++)
-            {
-                
-            }
+            
 
         }
 
