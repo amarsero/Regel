@@ -4,9 +4,7 @@ using System.Collections;
 [RequireComponent(typeof(LineRenderer))]
 public class LineaMira : MonoBehaviour {
 
-    Transform Cannon;
     LineRenderer Linea;
-    Transform Boca;
     Vector3 Squirly; //Rotación de espiral
     Quaternion rot; //Rotación de caída
     int VertexCount;
@@ -16,13 +14,14 @@ public class LineaMira : MonoBehaviour {
     {
         VertexCount = 100;
         Longitud = 4;
-        Cannon = GameObject.FindWithTag("Cannon").transform;
         Linea = GetComponent<LineRenderer>();
         Linea.SetVertexCount(VertexCount);
-        var children = Cannon.GetComponentsInChildren<Transform>();
-        foreach (var child in children)
-            if (child.name == "Mouth")
-                Boca = child;
+
+        float alfa = .5f;
+        Color start = Color.red;
+        Color end = Color.red;
+        end.a = alfa;
+        Linea.SetColors(start, end);
                 
 	}
 	
@@ -53,14 +52,27 @@ public class LineaMira : MonoBehaviour {
 
     void Update()
     {
-        Squirly = new Vector3();
-        rot = Cannon.rotation * Quaternion.Euler(0f, 0, 0);
+
+        
+
         for (int i = 0; i < VertexCount; i++)
-                {
-            //    Squirly.y = 4 * Mathf.Sin(Mathf.Deg2Rad * i * 30f);
-            //    Squirly.x = 4 * Mathf.Cos(Mathf.Deg2Rad * i * 30f);
-                rot = rot * Quaternion.Euler((Longitud/4) * -0.45f * (1.07f-Cannon.localRotation.x), 0, 0);
-                Linea.SetPosition(i, Boca.position + Quaternion.Euler(Squirly) * rot * Vector3.down * i * Longitud);
-			}
+        {
+            //Squirly.y =  2 * Mathf.Sin(Mathf.Deg2Rad * i * 30f);
+            //Squirly.x =  2 * Mathf.Cos(Mathf.Deg2Rad * i * 30f);
+            Linea.SetPosition(i,Quaternion.Euler(Squirly) * Vector3.back * (1-1/(i/2+1))*i);
+        }
+
+
+
+
+        //Squirly = new Vector3();
+        //rot = Cannon.rotation * Quaternion.Euler(0f, 0, 0);
+        //for (int i = 0; i < VertexCount; i++)
+        //        {
+        //    //    Squirly.y = 4 * Mathf.Sin(Mathf.Deg2Rad * i * 30f);
+        //    //    Squirly.x = 4 * Mathf.Cos(Mathf.Deg2Rad * i * 30f);
+        //        rot = rot * Quaternion.Euler((Longitud/4) * -0.45f * (1.07f-Cannon.localRotation.x), 0, 0);
+        //        Linea.SetPosition(i, Boca + Quaternion.Euler(Squirly) * rot * Vector3.down * i * Longitud);
+        //    }
     }
 }

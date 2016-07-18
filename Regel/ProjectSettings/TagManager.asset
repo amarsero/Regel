@@ -6,7 +6,6 @@ TagManager:
   tags:
   - Cannon
   - Ball
-  - Ball Spawn Point
   - Explosion
   - Brick
   layers:

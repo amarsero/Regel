@@ -17,9 +17,11 @@ public class SCamera : MonoBehaviour
 	// Update is called once per frame
     void Update()
     {
-        transform.position = Boca.position + new Vector3(3,2,-20);
-        transform.rotation = Cannon.rotation * Quaternion.Euler(90, 180, 0) * Quaternion.Euler(Cannon.eulerAngles.x / 4,0,0);
-            //restar mitad rotación local cannon0001
+        //transform.position = Boca.position + new Vector3(3,2,-20);
+        //transform.rotation = Cannon.rotation * Quaternion.Euler(90, 180, 0) * Quaternion.Euler(Cannon.eulerAngles.x / 4,0,0);
+        //    //restar mitad rotación local cannon0001
+
+
     }
  
 }
