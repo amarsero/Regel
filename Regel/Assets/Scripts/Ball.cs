@@ -17,7 +17,7 @@ public class Ball : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () 
     {
-	   rigid.AddExplosionForce(1200, ExplosionPoint, 5);
+	   rigid.AddExplosionForce(2500, ExplosionPoint, 5);
 
        tiempoDeVida -= Time.deltaTime;
 

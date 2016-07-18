@@ -4,18 +4,25 @@ using System.Collections.Generic;
 
 
 public class Wall : MonoBehaviour {
-    Dictionary<Vector3,GameObject> Bricks;
-    Vector3 Area;
-    Vector3 BrickSize;
+    Dictionary<Vector3,GameObject> bricks;
+    Vector3 area;
+    Vector3 brickSize;
+    GameObject freeBricks;
+
+    float expansionOnda; //Factor de propagación de la onda de impacto
 
 	// Use this for initialization
 	void Start ()
     {
-        Bricks = new Dictionary<Vector3, GameObject>();
-        GameObject Cube = new GameObject();
-        Area = new Vector3(10, 40, 0.3f); //In Bricks size
-        BrickSize = new Vector3(0.25f, 0.05f, 0.12f);
+        bricks = new Dictionary<Vector3, GameObject>();
+        GameObject Cube = new GameObject("Kadrukki");
+        area = new Vector3(10, 40, 0.12f); //In Bricks size
+        brickSize = new Vector3(0.25f, 0.05f, 0.12f);
         Material Madera = Resources.Load("Materials/Wood", typeof(Material)) as Material;
+        expansionOnda = 40;
+
+        freeBricks = new GameObject("Free Bricks");
+        freeBricks.transform.parent = null;
 
         //Vector3 GlueSize = new Vector3(BrickSize.y, BrickSize.y, BrickSize.z);
         //Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -24,41 +31,37 @@ public class Wall : MonoBehaviour {
         //Cube.transform.localScale = GlueSize;
         //Glues.Add(Cube);
 
-        float iini = transform.position.x - Area.x * BrickSize.x / 2; // i Inicial
-        float jini = transform.position.y + BrickSize.y / 2;
-        float kini = transform.position.z - Area.z * BrickSize.z / 2;
 
-        for (float i = iini; i < transform.position.x + Area.x * BrickSize.x / 2; i += BrickSize.x) // X = Ancho
+
+        for (float i = transform.position.x - area.x * brickSize.x / 2; i < transform.position.x + area.x * brickSize.x / 2; i += brickSize.x) // X = Ancho
         {
-            for (float j = jini; j < transform.position.y + Area.y * BrickSize.y + BrickSize.y / 2; j += BrickSize.y) //Y = Altura
+            for (float j = transform.position.y + brickSize.y / 2; j < transform.position.y + area.y * brickSize.y + brickSize.y / 2; j += brickSize.y) //Y = Altura
             {
-                for (float k =  kini; k < transform.position.z + Area.z * BrickSize.z / 2; k += BrickSize.z) // Z = Profundo
+                for (float k = transform.position.z - area.z * brickSize.z / 2; k < transform.position.z + area.z * brickSize.z / 2; k += brickSize.z) // Z = Profundo
                 {
                     Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    Cube.transform.parent = transform;
-                    if (Mathf.Floor(j) % BrickSize.x == 0) Cube.transform.position = new Vector3(i - BrickSize.x / 2, j, k);
+                    if (Mathf.Floor(j) % brickSize.x == 0) Cube.transform.position = new Vector3(i - brickSize.x / 2, j, k);
                     else Cube.transform.position = new Vector3(i, j, k);
-                    Cube.transform.localScale = BrickSize;
+                    Cube.transform.parent = transform;
+                    Cube.transform.localScale = brickSize;
                     Cube.GetComponent<MeshRenderer>().material = Madera;
                     Cube.tag = "Brick";
                     Cube.AddComponent<Brick>().SetPos(new Vector3(i, j, k));
                     
-                    Bricks.Add(new Vector3(i,j,k),Cube);
+                    bricks.Add(new Vector3(i,j,k),Cube);
 
                 }
             }
         } //Bricks generation
-
-
 
 	}
 
     void CheckWallStructure()
     {
 
-        for (int z = 0; z < Area.z; z++)
+        for (int z = 0; z < area.z; z++)
         {
-            for (int y = 0; y < Area.y; y++)
+            for (int y = 0; y < area.y; y++)
             {
                 
                 if (true)
@@ -79,18 +82,17 @@ public class Wall : MonoBehaviour {
 
     void OnCollisionEnter(Collision col)
     {
-        if (col.gameObject.tag == "Ball")
+        if (col.gameObject.tag == "Ball" || col.gameObject.tag == "Brick")
         {
-            for (int i = 0; i < col.contacts.Length; i++)
+            
+            GameObject Ladrillo = col.contacts[0].thisCollider.gameObject;
+            if (Ladrillo.GetComponents<Rigidbody>().Length == 0)
             {
-                GameObject Ladrillo = col.contacts[i].thisCollider.gameObject;
-                if (Ladrillo.GetComponents<Rigidbody>().Length == 0)
-                {
-                    PropagateImpact(Ladrillo, col.impulse);
+                    PropagateImpact(Ladrillo, -col.impulse);
                                      
                         
                     CheckWallStructure();
-                }
+                
             }
         }
     }
@@ -100,9 +102,45 @@ public class Wall : MonoBehaviour {
         Vector3 posicion = ladrillo.GetComponent<Brick>().pos;
         if (fuerza.magnitude > 10)
         {
-            ladrillo.transform.parent = null;
-            ladrillo.AddComponent<Rigidbody>().mass = 4;
-            Bricks[posicion] = null;
+            ladrillo.transform.parent = freeBricks.transform;   
+            Rigidbody rigid = ladrillo.AddComponent<Rigidbody>();
+            rigid.mass = 4;
+            rigid.velocity = fuerza / 4;
+            bricks[posicion] = null;
+
+            GameObject ladrilloContinuo;
+
+            if (bricks.TryGetValue(posicion+new Vector3(brickSize.x,0,0),out ladrilloContinuo) && ladrilloContinuo != null)
+            {
+                PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.x);
+            }
+
+            if (bricks.TryGetValue(posicion + new Vector3(-brickSize.x, 0, 0), out ladrilloContinuo) && ladrilloContinuo != null)
+            {
+                PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.x);
+            }
+
+            if (bricks.TryGetValue(posicion + new Vector3(0,brickSize.y, 0), out ladrilloContinuo) && ladrilloContinuo != null)
+            {
+                PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.y);
+            } 
+            
+            if (bricks.TryGetValue(posicion + new Vector3(0, -brickSize.y, 0), out ladrilloContinuo) && ladrilloContinuo != null)
+            {
+                PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.y);
+            }
+            
+            if (bricks.TryGetValue(posicion + new Vector3(0,0, brickSize.z), out ladrilloContinuo) && ladrilloContinuo != null)
+            {
+                PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.z);
+            }
+
+            if (bricks.TryGetValue(posicion + new Vector3(0,0,-brickSize.z), out ladrilloContinuo) && ladrilloContinuo != null)
+            {
+                PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.z);
+            }
+
+
 
      ///aplicar impulso y propagar a ladrillos lindantes
 
