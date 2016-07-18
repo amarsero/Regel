@@ -15,7 +15,7 @@ public class Wall : MonoBehaviour {
 	void Start ()
     {
         bricks = new Dictionary<Vector3, GameObject>();
-        GameObject Cube = new GameObject("Kadrukki");
+        GameObject Cube = new GameObject("Ladrillo");
         area = new Vector3(10, 40, 0.12f); //In Bricks size
         brickSize = new Vector3(0.25f, 0.05f, 0.12f);
         Material Madera = Resources.Load("Materials/Wood", typeof(Material)) as Material;
@@ -55,19 +55,48 @@ public class Wall : MonoBehaviour {
         } //Bricks generation
 
 	}
-
+    void DeleteBrick(GameObject ladrillo)
+    {
+        ladrillo.transform.parent = freeBricks.transform;
+        Rigidbody rigid = ladrillo.AddComponent<Rigidbody>();
+        rigid.mass = 4;
+        bricks[ladrillo.GetComponent<Brick>().pos] = null;
+    }
+    void DeleteBrick(Vector3 posLadrillo)
+    {
+        GameObject ladrillo = bricks[posLadrillo];
+        ladrillo.transform.parent = freeBricks.transform;
+        Rigidbody rigid = ladrillo.AddComponent<Rigidbody>();
+        rigid.mass = 4;
+        bricks[posLadrillo] = null;
+    }
     void CheckWallStructure()
     {
+        // ToDo: Convertir ladrillos agrupados en paredes
 
-        for (int z = 0; z < area.z; z++)
+        //Check empty rows
+        bool flag;
+        for (float k = transform.position.z - area.z * brickSize.z / 2; k < transform.position.z + area.z * brickSize.z / 2; k += brickSize.z) // Z = Profundo
         {
-            for (int y = 0; y < area.y; y++)
+            flag = true;
+            for (float j = transform.position.y + brickSize.y / 2; j < transform.position.y + area.y * brickSize.y + brickSize.y / 2; j += brickSize.y)
             {
                 
-                if (true)
+                for (float i = transform.position.x - area.x * brickSize.x / 2; i < transform.position.x + area.x * brickSize.x / 2; i += brickSize.x) // X = Ancho
                 {
-                    
-                }  
+                    if (new Vector3(i,j,k) != null)
+                    {
+                        flag = false;
+                    }
+                }
+                if (flag)
+                {
+                    for (float i = transform.position.x - area.x * brickSize.x / 2; i < transform.position.x + area.x * brickSize.x / 2; i += brickSize.x) // X = Ancho
+                    {
+                        DeleteBrick(new Vector3(i, j, k));
+                    }
+
+                }
             }
         }
     }
@@ -105,8 +134,8 @@ public class Wall : MonoBehaviour {
             ladrillo.transform.parent = freeBricks.transform;   
             Rigidbody rigid = ladrillo.AddComponent<Rigidbody>();
             rigid.mass = 4;
-            rigid.velocity = fuerza / 4;
             bricks[posicion] = null;
+            rigid.velocity = fuerza / 4;
 
             GameObject ladrilloContinuo;
 
