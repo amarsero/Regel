@@ -35,7 +35,7 @@ public class Wall : MonoBehaviour {
 
         for (float i = transform.position.x - area.x * brickSize.x / 2; i < transform.position.x + area.x * brickSize.x / 2; i += brickSize.x) // X = Ancho
         {
-            for (float j = transform.position.y + brickSize.y / 2; j < transform.position.y + area.y * brickSize.y + brickSize.y / 2; j += brickSize.y) //Y = Altura
+            for (float j = transform.position.y + brickSize.y / 2; j < transform.position.y + area.y * brickSize.y + brickSize.y / 2; j += brickSize.y) // Y = Altura
             {
                 for (float k = transform.position.z - area.z * brickSize.z / 2; k < transform.position.z + area.z * brickSize.z / 2; k += brickSize.z) // Z = Profundo
                 {
@@ -95,7 +95,6 @@ public class Wall : MonoBehaviour {
                     {
                         DeleteBrick(new Vector3(i, j, k));
                     }
-
                 }
             }
         }
@@ -170,8 +169,6 @@ public class Wall : MonoBehaviour {
             }
 
 
-
-     ///aplicar impulso y propagar a ladrillos lindantes
 
             
 

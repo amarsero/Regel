@@ -9,6 +9,7 @@ public class LineaMira : MonoBehaviour {
     Quaternion rot; //Rotación de caída
     int VertexCount;
     int Longitud;
+    Vector3 targetPosition;
 	// Use this for initialization
 	void Start () 
     {
@@ -17,10 +18,8 @@ public class LineaMira : MonoBehaviour {
         Linea = GetComponent<LineRenderer>();
         Linea.SetVertexCount(VertexCount);
 
-        float alfa = .5f;
-        Color start = Color.red;
-        Color end = Color.red;
-        end.a = alfa;
+        Color start = new Color(0, 200/255f, 50/255f);
+        Color end = new Color(0, 230 / 255f, 0, 0.5f);
         Linea.SetColors(start, end);
                 
 	}
@@ -53,13 +52,17 @@ public class LineaMira : MonoBehaviour {
     void Update()
     {
 
-        
 
         for (int i = 0; i < VertexCount; i++)
         {
             //Squirly.y =  2 * Mathf.Sin(Mathf.Deg2Rad * i * 30f);
             //Squirly.x =  2 * Mathf.Cos(Mathf.Deg2Rad * i * 30f);
-            Linea.SetPosition(i,Quaternion.Euler(Squirly) * Vector3.back * (1-1/(i/2+1))*i);
+            targetPosition = Quaternion.Euler(-i / 7f, 0, 0) * Vector3.back *  i/5;
+            if (Physics.CheckSphere(targetPosition,0.1f))
+	        {
+		        Linea.SetPosition(i,targetPosition);
+	        }
+            
         }
 
 
