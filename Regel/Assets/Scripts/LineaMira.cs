@@ -13,7 +13,6 @@ public class LineaMira : MonoBehaviour {
 	// Use this for initialization
 	void Start () 
     {
-        VertexCount = 100;
         Longitud = 4;
         Linea = GetComponent<LineRenderer>();
         Linea.SetVertexCount(VertexCount);
@@ -48,20 +47,25 @@ public class LineaMira : MonoBehaviour {
     //    }
 
     //}
-
+     
     void Update()
     {
 
-
+        VertexCount = 50;
+        Linea.SetVertexCount(VertexCount);
         for (int i = 0; i < VertexCount; i++)
         {
             //Squirly.y =  2 * Mathf.Sin(Mathf.Deg2Rad * i * 30f);
             //Squirly.x =  2 * Mathf.Cos(Mathf.Deg2Rad * i * 30f);
             targetPosition = Quaternion.Euler(-i / 7f, 0, 0) * Vector3.back *  i/5;
-            if (Physics.CheckSphere(targetPosition,0.1f))
+            Linea.SetPosition(i, targetPosition);
+            if (Physics.CheckSphere(transform.position + transform.rotation * (targetPosition + new Vector3(0, 0, 0.15f)), 0.05f))
 	        {
-		        Linea.SetPosition(i,targetPosition);
+                VertexCount = i;
+
+                Linea.SetVertexCount(VertexCount);
 	        }
+            
             
         }
 
@@ -77,5 +81,11 @@ public class LineaMira : MonoBehaviour {
         //        rot = rot * Quaternion.Euler((Longitud/4) * -0.45f * (1.07f-Cannon.localRotation.x), 0, 0);
         //        Linea.SetPosition(i, Boca + Quaternion.Euler(Squirly) * rot * Vector3.down * i * Longitud);
         //    }
+    }
+    void OnDrawGizmosSelected()
+    {
+        // Show Ball Spawn Point
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position + transform.rotation * (targetPosition + new Vector3(0, 0, 0.15f)), 0.05f);
     }
 }

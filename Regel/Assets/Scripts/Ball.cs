@@ -5,25 +5,32 @@ public class Ball : MonoBehaviour {
 
     Rigidbody rigid;
     Vector3 ExplosionPoint;
+    [SerializeField]
     float tiempoDeVida;
 	// Use this for initialization
 	void Start () 
     {
-        tiempoDeVida = 15;
+        tiempoDeVida = 15f;
         rigid = GetComponent<Rigidbody>();
-        ExplosionPoint = GameObject.FindGameObjectWithTag("Explosion").transform.position;
 	}
 	
 	// Update is called once per frame
 	void FixedUpdate () 
     {
 	   rigid.AddExplosionForce(2500, ExplosionPoint, 5);
-
        tiempoDeVida -= Time.deltaTime;
 
-       if (tiempoDeVida <= 0) Destroy(gameObject);
+       if (tiempoDeVida <= 0)
+       {
+           gameObject.SetActive(false);
+       }
 	}
 
-  
+    public void SetExplosionPointAndReset(Vector3 punto)
+    {
+        ExplosionPoint = punto;
+        tiempoDeVida = 15;
+    }
+
     
 }

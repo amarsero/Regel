@@ -2,21 +2,34 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public class Ladrillos
+{
+    struct Par
+    {
+        Vector3 Valor;
+        GameObject ladrillo;
+    }
 
+    List<Par> Lista = new List<Par>();
+
+
+}
 public class Wall : MonoBehaviour {
     Dictionary<Vector3,GameObject> bricks;
     Vector3 area;
     Vector3 brickSize;
     GameObject freeBricks;
-
+    Vector3 posicionGlobal;
     float expansionOnda; //Factor de propagación de la onda de impacto
+    
 
 	// Use this for initialization
 	void Start ()
     {
+        posicionGlobal = transform.position;
         bricks = new Dictionary<Vector3, GameObject>();
         GameObject Cube = new GameObject("Ladrillo");
-        area = new Vector3(10, 40, 0.12f); //In Bricks size
+        area = new Vector3(10, 40, 0.12f); //In meters.
         brickSize = new Vector3(0.25f, 0.05f, 0.12f);
         Material Madera = Resources.Load("Materials/Wood", typeof(Material)) as Material;
         expansionOnda = 40;
@@ -27,17 +40,17 @@ public class Wall : MonoBehaviour {
         //Vector3 GlueSize = new Vector3(BrickSize.y, BrickSize.y, BrickSize.z);
         //Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         //Cube.transform.parent = transform;
-        //Cube.transform.position = new Vector3(i + BrickSize.x / 2, j, k);
+        //Cube.posicionGlobal = new Vector3(i + BrickSize.x / 2, j, k);
         //Cube.transform.localScale = GlueSize;
         //Glues.Add(Cube);
 
 
 
-        for (float i = transform.position.x - area.x * brickSize.x / 2; i < transform.position.x + area.x * brickSize.x / 2; i += brickSize.x) // X = Ancho
+        for (float i = posicionGlobal.x - area.x * brickSize.x / 2; i < posicionGlobal.x + area.x * brickSize.x / 2; i += brickSize.x) // X = Ancho
         {
-            for (float j = transform.position.y + brickSize.y / 2; j < transform.position.y + area.y * brickSize.y + brickSize.y / 2; j += brickSize.y) // Y = Altura
+            for (float j = posicionGlobal.y + brickSize.y / 2; j < posicionGlobal.y + area.y * brickSize.y + brickSize.y / 2; j += brickSize.y) // Y = Altura
             {
-                for (float k = transform.position.z - area.z * brickSize.z / 2; k < transform.position.z + area.z * brickSize.z / 2; k += brickSize.z) // Z = Profundo
+                for (float k = posicionGlobal.z - area.z * brickSize.z / 2; k < posicionGlobal.z + area.z * brickSize.z / 2; k += brickSize.z) // Z = Profundo
                 {
                     Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     if (Mathf.Floor(j) % brickSize.x == 0) Cube.transform.position = new Vector3(i - brickSize.x / 2, j, k);
@@ -54,44 +67,55 @@ public class Wall : MonoBehaviour {
             }
         } //Bricks generation
 
+
+
 	}
     void DeleteBrick(GameObject ladrillo)
     {
-        ladrillo.transform.parent = freeBricks.transform;
-        Rigidbody rigid = ladrillo.AddComponent<Rigidbody>();
-        rigid.mass = 4;
-        bricks[ladrillo.GetComponent<Brick>().pos] = null;
+        if (ladrillo != null)
+        {
+            ladrillo.transform.parent = freeBricks.transform;
+            Rigidbody rigid = ladrillo.AddComponent<Rigidbody>();
+            rigid.mass = 4;
+            bricks[ladrillo.GetComponent<Brick>().pos] = null;
+        }
     }
     void DeleteBrick(Vector3 posLadrillo)
     {
-        GameObject ladrillo = bricks[posLadrillo];
-        ladrillo.transform.parent = freeBricks.transform;
-        Rigidbody rigid = ladrillo.AddComponent<Rigidbody>();
-        rigid.mass = 4;
-        bricks[posLadrillo] = null;
+        if (bricks[posLadrillo] != null)
+        {
+            GameObject ladrillo = bricks[posLadrillo];
+            ladrillo.transform.parent = freeBricks.transform;
+            Rigidbody rigid = ladrillo.AddComponent<Rigidbody>();
+            rigid.mass = 4;
+            bricks[posLadrillo] = null;
+        }
     }
     void CheckWallStructure()
     {
         // ToDo: Convertir ladrillos agrupados en paredes
 
         //Check empty rows
+
         bool flag;
-        for (float k = transform.position.z - area.z * brickSize.z / 2; k < transform.position.z + area.z * brickSize.z / 2; k += brickSize.z) // Z = Profundo
+
+        Debug.Log(posicionGlobal);
+        for (float k = posicionGlobal.z - area.z * brickSize.z / 2; k < posicionGlobal.z + area.z * brickSize.z / 2; k += brickSize.z) // Z = Profundo
         {
             flag = true;
-            for (float j = transform.position.y + brickSize.y / 2; j < transform.position.y + area.y * brickSize.y + brickSize.y / 2; j += brickSize.y)
+            for (float j = posicionGlobal.y + brickSize.y / 2; j < posicionGlobal.y + area.y * brickSize.y + brickSize.y / 2; j += brickSize.y)
             {
                 
-                for (float i = transform.position.x - area.x * brickSize.x / 2; i < transform.position.x + area.x * brickSize.x / 2; i += brickSize.x) // X = Ancho
+                for (float i = posicionGlobal.x - area.x * brickSize.x / 2; i < posicionGlobal.x + area.x * brickSize.x / 2; i += brickSize.x) // X = Ancho
                 {
-                    if (new Vector3(i,j,k) != null)
+                    if (bricks[new Vector3(i,j,k)] != null)
                     {
                         flag = false;
                     }
                 }
                 if (flag)
                 {
-                    for (float i = transform.position.x - area.x * brickSize.x / 2; i < transform.position.x + area.x * brickSize.x / 2; i += brickSize.x) // X = Ancho
+                    for (float i = posicionGlobal.x - area.x * brickSize.x / 2; i < posicionGlobal.x + area.x * brickSize.x / 2; i += brickSize.x) // X = Ancho
                     {
                         DeleteBrick(new Vector3(i, j, k));
                     }
@@ -105,11 +129,12 @@ public class Wall : MonoBehaviour {
 	// Update is called once per frame
 	void Update () 
     {
-	
+
 	}
 
     void OnCollisionEnter(Collision col)
     {
+
         if (col.gameObject.tag == "Ball" || col.gameObject.tag == "Brick")
         {
             
