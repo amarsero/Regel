@@ -54,9 +54,6 @@ public class Cannon001 : MonoBehaviour {
         }
     }
 
-    //To Do:
-    //Implementar sistema para guardar Bolas en un array y moverlas al BallSpawnPoint en vez de instanciarlas en el momento
-
     void AgregarBola()
     {
         listaBolas[indice] = (GameObject)Instantiate(Bola, BallSpawnPoint, Quaternion.identity);
