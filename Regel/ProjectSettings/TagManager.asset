@@ -8,6 +8,7 @@ TagManager:
   - Ball
   - Explosion
   - Brick
+  - Wall
   layers:
   - Default
   - TransparentFX
