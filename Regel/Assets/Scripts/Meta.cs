@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class SMeta : MonoBehaviour
+public class Meta : MonoBehaviour
 {
 
     GameObject Camera1;
