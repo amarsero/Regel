@@ -14,26 +14,12 @@ public class BigWall : MonoBehaviour
     void Awake()
     {
         GameObject Cube = new GameObject("Ladrillo");
-        brickSize = new Vector3(1.2f, 0.35f, 0.7f);        
-        area = new Vector3(10, 12, 1); //In Bricks size.
+        brickSize = new Vector3(1.5f, 0.375f, 0.75f);        
+        area = new Vector3(4, 8, 1); //In Bricks size. //Unidad ocupa 6*3*0.75
         Material Madera = Resources.Load("Materials/Wood", typeof(Material)) as Material;
         expansionOnda = 2f; //Cuanto más chico, más expansion
         bricks = new Dictionary<Vector3, GameObject>();
 
-        //Vector3 GlueSize = new Vector3(BrickSize.y, BrickSize.y, BrickSize.z);
-        //Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        //Cube.transform.parent = transform;
-        //Cube.transform.position = new Vector3(i + BrickSize.x / 2, j, k);
-        //Cube.transform.localScale = GlueSize;
-        //Glues.Add(Cube);
-
-
-
-        //for (float i = transform.position.x - area.x * brickSize.x / 2; i < transform.position.x + area.x * brickSize.x / 2; i += brickSize.x) // X = Ancho
-        //{
-        //    for (float j = transform.position.y + brickSize.y / 2; j < transform.position.y + area.y * brickSize.y + brickSize.y / 2; j += brickSize.y) // Y = Altura
-        //    {
-        //        for (float k = transform.position.z - area.z * brickSize.z / 2; k < transform.position.z + area.z * brickSize.z / 2; k += brickSize.z) // Z = Profundo
         Vector3 posicion;
         for (float i = 0; i < area.x; i++) // X = Ancho
         {
@@ -42,11 +28,12 @@ public class BigWall : MonoBehaviour
                 for (float k = 0; k < area.z; k++) // Z = Profundo
                 {
                     Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    posicion = new Vector3(transform.position.x - area.x * brickSize.x / 2 + i * brickSize.x, transform.position.y + brickSize.y / 2 + j * brickSize.y,
-                                            transform.position.z - area.z * brickSize.z / 2 + k * brickSize.z);
-                    Cube.transform.position = posicion;
-                    if ((j % 2) == 0) Cube.transform.position += new Vector3(-brickSize.x / 2, 0, 0);
                     Cube.transform.parent = transform;
+                    posicion = new Vector3(area.x * brickSize.x / 2 + i * brickSize.x,brickSize.y / 2 + j * brickSize.y,
+                                            area.z * brickSize.z / 2 + k * brickSize.z);
+                    Cube.transform.localPosition = posicion;
+                    if ((j % 2) == 0) Cube.transform.localPosition += new Vector3(-brickSize.x / 2, 0, 0);
+                    Cube.transform.rotation = transform.rotation;
                     Cube.transform.localScale = brickSize;
                     Cube.GetComponent<BoxCollider>().material = materialFisico;
                     Cube.GetComponent<MeshRenderer>().material = Madera;
@@ -106,21 +93,7 @@ public class BigWall : MonoBehaviour
     {
 
     }
-    // void OnCollisionEnter(Collision col)
-    //{
 
-    //    if (col.gameObject.tag == "Ball" || col.gameObject.tag == "Brick")
-    //    {
-    //        GameObject ladrillo = col.contacts[0].thisCollider.gameObject;
-    //        if (bricks[ladrillo.GetComponent<Brick>().pos] != null)
-    //        {
-    //                PropagateImpact(ladrillo, -col.impulse);
-                                     
-
-                
-    //        }
-    //    }
-    //}
     public void CheckCollision(Vector3 posicion, Vector3 impulso)
     {
         if (bricks[posicion] != null && impulso.magnitude > 10)
