@@ -14,7 +14,7 @@ public class Ladrillos
 
 
 }
-public class Wall : MonoBehaviour {
+public class Wall : MonoBehaviour, IWall {
     Dictionary<Vector3,GameObject> bricks;
     Vector3 area;
     Vector3 brickSize;
@@ -59,7 +59,7 @@ public class Wall : MonoBehaviour {
                     Cube.transform.localScale = brickSize;
                     Cube.GetComponent<MeshRenderer>().material = Madera;
                     Cube.tag = "Brick";
-                    Cube.AddComponent<Brick>().SetPos(new Vector3(i, j, k));
+                    Cube.AddComponent<Brick>().Init(new Vector3(i, j, k),this);
                     
                     bricks.Add(new Vector3(i,j,k),Cube);
 
@@ -148,6 +148,11 @@ public class Wall : MonoBehaviour {
                 
             }
         }
+    }
+
+    public void CheckCollision(Vector3 posicion, Vector3 impulso)
+    {
+
     }
 
     void PropagateImpact(GameObject ladrillo, Vector3 fuerza)

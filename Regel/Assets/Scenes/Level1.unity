@@ -752,7 +752,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae08663e5fdcb264ca55809c0101f2ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bigWall: {fileID: 107654, guid: 49c02713e142b8d4590034f124eeb0a6, type: 2}
+  wall: {fileID: 107654, guid: 49c02713e142b8d4590034f124eeb0a6, type: 2}
 --- !u!4 &2014936457
 Transform:
   m_ObjectHideFlags: 0

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 
-public class BigWall : MonoBehaviour
+public class BigWall : MonoBehaviour, IWall
 {
     Vector3 area;
     Vector3 brickSize;
@@ -13,14 +13,15 @@ public class BigWall : MonoBehaviour
 
     void Awake()
     {
-        GameObject Cube = new GameObject("Ladrillo");
-        brickSize = new Vector3(1.5f, 0.375f, 0.75f);        
+        GameObject Cube;
+        brickSize = new Vector3(1.5f, 0.375f, 0.75f); //x = 2*z    
         area = new Vector3(4, 8, 1); //In Bricks size. //Unidad ocupa 6*3*0.75
         Material Madera = Resources.Load("Materials/Wood", typeof(Material)) as Material;
         expansionOnda = 2f; //Cuanto más chico, más expansion
         bricks = new Dictionary<Vector3, GameObject>();
 
-        Vector3 posicion;
+        Vector3 posicion;        
+        FixedJoint fixedJointBase;
         for (float i = 0; i < area.x; i++) // X = Ancho
         {
             for (float j = 0; j < area.y; j++) // Y = Altura
@@ -37,29 +38,8 @@ public class BigWall : MonoBehaviour
                     Cube.transform.localScale = brickSize;
                     Cube.GetComponent<BoxCollider>().material = materialFisico;
                     Cube.GetComponent<MeshRenderer>().material = Madera;
-                    Cube.tag = "Brick";
-                    Cube.AddComponent<Rigidbody>().mass = 100 * brickSize.x * brickSize.y * brickSize.z;
-                    Cube.AddComponent<Brick>().SetPos(new Vector3(i, j, k));
+                    Cube.AddComponent<Rigidbody>().mass = 100 * brickSize.x * brickSize.y * brickSize.z;                    
                     bricks.Add(new Vector3(i, j, k), Cube);
-
-
-                }
-            }
-        } //Bricks generation
-
-    }
-    // Use this for initialization
-    void Start()
-    {
-       
-        FixedJoint fixedJointBase;
-
-        for (float i = 0; i < area.x; i++) // X = Ancho
-        {
-            for (float j = 0; j < area.y; j++) // Y = Altura
-            {
-                for (float k = 0; k < area.z; k++) // Z = Profundo
-                {
                     if (i > 0)
                     {
                         fixedJointBase = bricks[new Vector3(i, j, k)].AddComponent<FixedJoint>();
@@ -73,21 +53,27 @@ public class BigWall : MonoBehaviour
                         fixedJointBase.connectedBody = bricks[new Vector3(i, j - 1, k)].GetComponent<Rigidbody>();
                         fixedJointBase.breakForce = 1000; //Esto en 10000 crea columnas
                     }
-                    if(k > 0)
+                    if (k > 0)
                     {
 
                         fixedJointBase = bricks[new Vector3(i, j, k)].AddComponent<FixedJoint>();
-                        fixedJointBase.connectedBody = bricks[new Vector3(i , j, k - 1)].GetComponent<Rigidbody>();
-                        fixedJointBase.breakForce = 150; //meh
-
+                        fixedJointBase.connectedBody = bricks[new Vector3(i, j, k - 1)].GetComponent<Rigidbody>();
+                        fixedJointBase.breakForce = 150;
                     }
+                    Cube.AddComponent<Brick>().Init(new Vector3(i, j, k),this);
+
+
                 }
             }
-        }
-
-
+        } //Bricks generation
 
     }
+    // Use this for initialization
+    void Start()
+    {
+      
+    }
+
     // Update is called once per frame
     void Update()
     {

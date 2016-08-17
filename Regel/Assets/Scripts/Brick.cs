@@ -2,21 +2,33 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public interface IWall
+{
+    // Property signatures:
+    void CheckCollision(Vector3 posicion, Vector3 impulso);
+
+}
+
 public class Brick : MonoBehaviour {
 
     Rigidbody rigid;
     public Vector3 pos;
-    BigWall wallScript;
+    IWall wallScript;
+
+
 	// Use this for initialization
 	void Start () {
-        rigid = GetComponent<Rigidbody>();
-        wallScript = GameObject.FindGameObjectWithTag("Wall").GetComponent<BigWall>();
 	}
 
-    public void SetPos(Vector3 posicion)
+    public void Init(Vector3 posicion,IWall script)
     {
         pos = posicion;
+        wallScript = script;
+        rigid = GetComponent<Rigidbody>();
+        gameObject.tag = "Brick";
     }
+
+
 	
 	// Update is called once per frame
 	void Update () {

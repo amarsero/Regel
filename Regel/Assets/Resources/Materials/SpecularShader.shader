@@ -66,7 +66,7 @@
 				float3 specularReflection = atten * _SpecColor.rgb * max (0.0 , dot (normalDirection, lightDirection)) * pow(max (0.0 ,dot ( reflect( -lightDirection, normalDirection) , viewDirection)) ,_Shininess);
 				float3 lightFinal = diffuseReflection + specularReflection + UNITY_LIGHTMODEL_AMBIENT;
 
-				if (i.uv.x < 0.02 | i.uv.y < 0.02 ){
+				if (i.uv.x < 0.01 | i.uv.y < 0.01 | i.uv.x > 0.99 | i.uv.y > 0.99  ){
 					return float4(lightFinal*0.9,1.0);
 					}
 				
