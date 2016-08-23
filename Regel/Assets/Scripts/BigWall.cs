@@ -2,6 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 
+// ToDo:
+// Static public Poder crear ladrillos individuales
+// Arreglar (o Balancear) PropagateImpact Nota1: OnCollision no funciona ya que dejan de pertenecer a Bricks en el instante que se instancian
+// Agregar columnas fijas al suelo?
 
 public class BigWall : MonoBehaviour, IWall
 {
@@ -30,7 +34,8 @@ public class BigWall : MonoBehaviour, IWall
     /// Crea la pared que se va a representar en el juego
     /// </summary>
     /// <param name="doble">Doble longitud?</param>
-    public void CrearPared(bool doble)
+    /// <param name="inicioLargo">Tamaño del primer desfasaje * 1.5</param>
+    public void CrearPared(bool doble, bool inicioLargo)
     {
         //Variables temporales
         GameObject Cube;
@@ -39,9 +44,9 @@ public class BigWall : MonoBehaviour, IWall
         FixedJoint fixedJointBase;
 
         //Definición de variables de la clase globales
-        brickSize = new Vector3(1.5f, 0.375f, 0.75f); //x = 2*z    
+        brickSize = new Vector3(1.5f, 0.375f, 0.75f); //x = 2*z = 4*y    
         area = new Vector3(4, 8, 1); //In Bricks size. //Unidad ocupa 6*3*0.75
-        if (doble) area.y *= 2;
+        if (doble) area.x *= 2;
         expansionOnda = 1.2f; //Cuanto más chico, más expansion
         bricks = new Dictionary<Vector3, GameObject>();
 
@@ -53,16 +58,33 @@ public class BigWall : MonoBehaviour, IWall
                 for (float k = 0; k < area.z; k++) // Z = Profundo
                 {
                     Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    Cube.transform.parent = transform;
-                    posicion = new Vector3(area.x * brickSize.x / 2 + i * brickSize.x, brickSize.y / 2 + j * brickSize.y,
-                                            area.z * brickSize.z / 2 + k * brickSize.z);
-                    Cube.transform.localPosition = posicion;
-                    if ((j % 2) == 0) Cube.transform.localPosition += new Vector3(-brickSize.x / 2, 0, 0);
-                    Cube.transform.rotation = transform.rotation;
                     Cube.transform.localScale = brickSize;
+                    Cube.transform.parent = transform;
+                    posicion = new Vector3(-area.x * brickSize.x / 2 + brickSize.x * 3/ 4 + i * brickSize.x, brickSize.y / 2 + j * brickSize.y,
+                                            -area.z * brickSize.z / 2 + brickSize.z / 2 + k * brickSize.z);
+                    Cube.transform.localPosition = posicion;
+                    if ((j % 2) == 0)
+                    {
+                        Cube.transform.localPosition += new Vector3(-brickSize.x / 2, 0, 0);
+                        if (inicioLargo && i == 0)
+                        {
+                            Cube.transform.localPosition += new Vector3(brickSize.x / 4, 0, 0);
+                            Cube.transform.localScale += new Vector3(-brickSize.x / 2, 0, 0);
+                        }
+
+                    }
+                    else
+                    {
+                        if (inicioLargo && i == 0)
+                        {
+                            Cube.transform.localPosition += new Vector3(-brickSize.x / 4, 0, 0);
+                            Cube.transform.localScale += new Vector3(brickSize.x / 2, 0, 0);
+                        }
+                    }
+                    Cube.transform.rotation = transform.rotation;
                     Cube.GetComponent<BoxCollider>().material = materialFisico;
                     Cube.GetComponent<MeshRenderer>().material = Madera;
-                    Cube.AddComponent<Rigidbody>().mass = 100 * brickSize.x * brickSize.y * brickSize.z;
+                    Cube.AddComponent<Rigidbody>().mass = 100 * brickSize.x * brickSize.y * brickSize.z;    
                     bricks.Add(new Vector3(i, j, k), Cube);
                     if (i > 0)
                     {
@@ -202,5 +224,15 @@ public class BigWall : MonoBehaviour, IWall
 
          }
      }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+
+        Gizmos.DrawSphere(bricks[new Vector3(0, 0, 0)].transform.position, 0.75f);
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawSphere(bricks[new Vector3(area.x-1, 0, 0)].transform.position, 0.75f);
+    }
 }
 

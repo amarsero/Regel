@@ -65,16 +65,89 @@ public class FabricaCross
     /// <returns></returns>
     private static GameObject CrearCrossI(Cross cross,bool doble)
     {
+        
         GameObject pared = new GameObject("I: " + cross.postion.ToString());
-
-        pared.AddComponent<BigWall>().CrearPared(doble);
         pared.transform.position = cross.postion;
 
+        pared.AddComponent<BigWall>().CrearPared(doble,false);
+
+        if (doble && cross.partes.Equals(Signos.Este | Signos.Oeste)) pared.transform.rotation = Quaternion.Euler(0, 90, 0);
+        else if (cross.partes.Equals(Signos.Norte)) pared.transform.position += new Vector3(3, 0, 0);
+        else if (cross.partes.Equals(Signos.Este))
+        {
+            pared.transform.position += new Vector3(0, 0, 3);
+            pared.transform.rotation = Quaternion.Euler(0, 90, 0);
+        }
+        else if (cross.partes.Equals(Signos.Sur))
+        {
+            pared.transform.position += new Vector3(-3, 0,0 );
+        }
+        else if (cross.partes.Equals(Signos.Oeste))
+        {
+            pared.transform.position += new Vector3(0, 0, -3);
+            pared.transform.rotation = Quaternion.Euler(0, 90, 0);
+        }
+
+
+
+
+
+
+        return pared;
+    }
+
+    private static GameObject CrearCrossI(Signos signo, bool desfasaje)
+    {
+
+        GameObject pared = new GameObject(signo.ToString());
+        pared.AddComponent<BigWall>().CrearPared(false, desfasaje);
+
+        if (signo.Equals(Signos.Norte)) pared.transform.position += new Vector3(3, 0, 0);
+        else if (signo.Equals(Signos.Este))
+        {
+            pared.transform.position += new Vector3(0, 0, 3);
+            pared.transform.rotation = Quaternion.Euler(0, 90, 0);
+        }
+        else if (signo.Equals(Signos.Sur))
+        {
+            pared.transform.position += new Vector3(-3, 0, 0);
+        }
+        else if (signo.Equals(Signos.Oeste))
+        {
+            pared.transform.position += new Vector3(0, 0, -3);
+            pared.transform.rotation = Quaternion.Euler(0, 90, 0);
+        }
+        
         return pared;
     }
     private static GameObject CrearCrossL(Cross cross)
     {
-        throw new System.NotImplementedException();
+        // Orientación de los Crosses http://i.imgur.com/acUozPG.png
+        // Arreglar para que las puntas conecten cuando se rotan
+        // Arreglar Este es en realidad Oeste (invertirlos)
+        GameObject pared = new GameObject("L: " + cross.postion.ToString());
+        pared.transform.position = cross.postion;
+        GameObject semipared1 = CrearCrossI(Signos.Norte, false);
+        semipared1.transform.parent = pared.transform;
+        semipared1.transform.position += pared.transform.position;
+        GameObject semipared2 = CrearCrossI(Signos.Este, true);
+        semipared2.transform.parent = pared.transform;
+        semipared2.transform.position += pared.transform.position;
+
+        UnirParedes(semipared1.GetComponent<BigWall>().PrimerosLadrillos(), semipared2.GetComponent<BigWall>().UltimosLadrillos());
+
+        return pared;
+    }
+
+    private static void UnirParedes(GameObject[] lista1, GameObject[] lista2)
+    {
+        FixedJoint fixedJointBase;
+        for (int i = 0; i < lista1.Length; i++)
+        {
+            fixedJointBase = lista1[i].AddComponent<FixedJoint>();
+            fixedJointBase.connectedBody = lista2[i].GetComponent<Rigidbody>();
+            fixedJointBase.breakForce = 150;
+        }
     }
 
     private static GameObject CrearCrossT(Cross cross)
@@ -152,7 +225,9 @@ public class WallBuilder : MonoBehaviour {
     //    Instantiate(wall, new Vector3(62.5f, 0, 300.25f), Quaternion.Euler(0, 90, 0));
     //    Instantiate(wall, new Vector3(64.75f, 0, 292.75f), Quaternion.Euler(0, 180, 0));
     //    Instantiate(wall, new Vector3(57.25f, 0, 290.5f), Quaternion.Euler(0, 270, 0));
-        FabricaCross.CrearCross(new Cross(Signos.Norte, Signos.Ninguno, new Vector3(55, 0, 298)));
+    //    FabricaCross.CrearCross(new Cross(Signos.Norte, Signos.Ninguno, new Vector3(55, 0, 298))); //.transform.parent = transform
+
+        FabricaCross.CrearCross(new Cross(Signos.Norte | Signos.Este, Signos.Ninguno, new Vector3(55, 0, 298))); //.transform.parent = transform
 
     }
 
@@ -162,4 +237,9 @@ public class WallBuilder : MonoBehaviour {
 	void Update () {
 	
 	}
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(new Vector3(55, 0, 298), new Vector3(55, 10, 298));
+    }
 }
