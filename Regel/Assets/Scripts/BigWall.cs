@@ -4,17 +4,30 @@ using System.Collections.Generic;
 
 // ToDo:
 // Static public Poder crear ladrillos individuales
-// Arreglar (o Balancear) PropagateImpact Nota1: OnCollision no funciona ya que dejan de pertenecer a Bricks en el instante que se instancian
+// Arreglar (o Balancear) PropagateImpact Nota: Arreglar Distancia
 // Agregar columnas fijas al suelo?
 
 public class BigWall : MonoBehaviour, IWall
 {
     Vector3 area;
-    Vector3 brickSize;
+    static Vector3 _brickSize;
     float expansionOnda; //Factor de propagación de la onda de impacto
     public PhysicMaterial materialFisico;
     Dictionary<Vector3, GameObject> bricks;
 
+    static public Vector3 brickSize
+    {
+        get
+        {
+            return _brickSize;
+        }
+        private set
+        { 
+            _brickSize = value;
+        }
+
+
+    }
     void Awake()
     {
         
@@ -34,8 +47,13 @@ public class BigWall : MonoBehaviour, IWall
     /// Crea la pared que se va a representar en el juego
     /// </summary>
     /// <param name="doble">Doble longitud?</param>
-    /// <param name="inicioLargo">Tamaño del primer desfasaje * 1.5</param>
-    public void CrearPared(bool doble, bool inicioLargo)
+    /// 
+
+    public void CrearPared(bool doble)
+    {
+        CrearPared(doble, Signos.Ninguno);
+    }
+    public void CrearPared(bool doble, Signos signo)
     {
         //Variables temporales
         GameObject Cube;
@@ -44,10 +62,10 @@ public class BigWall : MonoBehaviour, IWall
         FixedJoint fixedJointBase;
 
         //Definición de variables de la clase globales
-        brickSize = new Vector3(1.5f, 0.375f, 0.75f); //x = 2*z = 4*y    
+        _brickSize = new Vector3(1.5f, 0.375f, 0.75f); //x = 2*z = 4*y    
         area = new Vector3(4, 8, 1); //In Bricks size. //Unidad ocupa 6*3*0.75
         if (doble) area.x *= 2;
-        expansionOnda = 1.2f; //Cuanto más chico, más expansion
+        expansionOnda = 4; //Cuanto más chico, más expansion
         bricks = new Dictionary<Vector3, GameObject>();
 
 
@@ -58,33 +76,42 @@ public class BigWall : MonoBehaviour, IWall
                 for (float k = 0; k < area.z; k++) // Z = Profundo
                 {
                     Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    Cube.transform.localScale = brickSize;
+                    Cube.transform.localScale = _brickSize;
                     Cube.transform.parent = transform;
-                    posicion = new Vector3(-area.x * brickSize.x / 2 + brickSize.x * 3/ 4 + i * brickSize.x, brickSize.y / 2 + j * brickSize.y,
-                                            -area.z * brickSize.z / 2 + brickSize.z / 2 + k * brickSize.z);
+                    posicion = new Vector3(-area.x * _brickSize.x / 2 + _brickSize.x * 3/ 4 + i * _brickSize.x, _brickSize.y / 2 + j * _brickSize.y,
+                                            -area.z * _brickSize.z / 2 + _brickSize.z / 2 + k * _brickSize.z);
                     Cube.transform.localPosition = posicion;
                     if ((j % 2) == 0)
                     {
-                        Cube.transform.localPosition += new Vector3(-brickSize.x / 2, 0, 0);
-                        if (inicioLargo && i == 0)
+                        Cube.transform.localPosition += new Vector3(-_brickSize.x / 2, 0, 0);
+                        if (i==0 && signo.Equals(Signos.Este))
                         {
-                            Cube.transform.localPosition += new Vector3(brickSize.x / 4, 0, 0);
-                            Cube.transform.localScale += new Vector3(-brickSize.x / 2, 0, 0);
+                            Cube.transform.localPosition += new Vector3(BigWall.brickSize.y, 0, 0);
+                            Cube.transform.localScale += new Vector3(-BigWall.brickSize.x / 2, 0, 0);
+                        }
+                        if (i == (area.x-1) && signo.Equals(Signos.Sur))
+                        {
+                            Cube.transform.localPosition += new Vector3(BigWall.brickSize.y, 0, 0);
+                            //Cube.transform.localScale += new Vector3(BigWall.brickSize., 0, 0);
                         }
 
                     }
-                    else
+                    else if (i == 0 && signo.Equals(Signos.Este))
                     {
-                        if (inicioLargo && i == 0)
-                        {
-                            Cube.transform.localPosition += new Vector3(-brickSize.x / 4, 0, 0);
-                            Cube.transform.localScale += new Vector3(brickSize.x / 2, 0, 0);
-                        }
+                        Cube.transform.localPosition += new Vector3(-BigWall.brickSize.y, 0, 0);
+                        Cube.transform.localScale += new Vector3(BigWall.brickSize.x / 2, 0, 0);
                     }
+                    else if (i == (area.x - 1) && signo.Equals(Signos.Sur))
+                    {
+                        Cube.transform.localPosition += new Vector3(-BigWall.brickSize.y, 0, 0);
+                        //Cube.transform.localScale += new Vector3(-BigWall.brickSize.y, 0, 0);
+                    }
+
+
                     Cube.transform.rotation = transform.rotation;
                     Cube.GetComponent<BoxCollider>().material = materialFisico;
                     Cube.GetComponent<MeshRenderer>().material = Madera;
-                    Cube.AddComponent<Rigidbody>().mass = 100 * brickSize.x * brickSize.y * brickSize.z;    
+                    Cube.AddComponent<Rigidbody>().mass = 100 * _brickSize.x * _brickSize.y * _brickSize.z;    
                     bricks.Add(new Vector3(i, j, k), Cube);
                     if (i > 0)
                     {
@@ -142,21 +169,21 @@ public class BigWall : MonoBehaviour, IWall
 
     public void CheckCollision(Vector3 posicion, Vector3 impulso)
     {
-        if (bricks[posicion] != null && impulso.magnitude > 10)
+        if (impulso.magnitude > 100)
         {
-            PropagateImpact(posicion, -impulso);
+            PropagateImpact(posicion, impulso/expansionOnda);
         }
     }
      private void PropagateImpact(GameObject ladrillo, Vector3 fuerza)
      {
          Vector3 posicion = ladrillo.GetComponent<Brick>().pos;
-         bricks[posicion] = null;
+         
          _PropagateImpact(posicion, fuerza);
 
      }
      private void PropagateImpact(Vector3 posicion, Vector3 fuerza)
      {
-         bricks[posicion] = null;
+         
          _PropagateImpact(posicion, fuerza);
 
      }
@@ -164,58 +191,64 @@ public class BigWall : MonoBehaviour, IWall
     private void _PropagateImpact(Vector3 posicion, Vector3 fuerza)
     {
 
-         if (fuerza.magnitude > 5)
+         if (fuerza.magnitude > 100)
          {
              GameObject ladrilloContinuo;
 
              if (posicion.x < area.x - 1)
              {
                  ladrilloContinuo = bricks[posicion + new Vector3(1, 0, 0)];
-                 if (ladrilloContinuo != null)
+                 if (Vector3.Distance(ladrilloContinuo.transform.position,transform.position) < brickSize.x)
                  {
-                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.x);
+                     ladrilloContinuo.GetComponent<Rigidbody>().AddForce(fuerza,ForceMode.Force);
+                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / _brickSize.x);
                  }
              }
              if(posicion.x > 0)
              {
                  ladrilloContinuo = bricks[posicion + new Vector3(-1, 0, 0)];
-                 if (ladrilloContinuo != null)
+                 if (Vector3.Distance(ladrilloContinuo.transform.position, transform.position) < brickSize.x)
                  {
-                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.x);
+                     ladrilloContinuo.GetComponent<Rigidbody>().AddForce(fuerza, ForceMode.Impulse);
+                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / _brickSize.x);
                  }
              }
 
              if (posicion.y < area.y - 1)
              {
                  ladrilloContinuo = bricks[posicion + new Vector3(0, 1, 0)];
-                 if (ladrilloContinuo != null)
+                 if (Vector3.Distance(ladrilloContinuo.transform.position, transform.position) < brickSize.y + 0.25f)
                  {
-                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.y);
+                     ladrilloContinuo.GetComponent<Rigidbody>().AddForce(fuerza, ForceMode.Impulse);
+                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / _brickSize.y);
                  }
              }
              if (posicion.y > 0)
              {
                  ladrilloContinuo = bricks[posicion + new Vector3(0, -1, 0)];
-                 if (ladrilloContinuo != null)
+                 if (Vector3.Distance(ladrilloContinuo.transform.position, transform.position) < brickSize.y + 0.25f)
                  {
-                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.y);
+                     ladrilloContinuo.GetComponent<Rigidbody>().AddForce(fuerza, ForceMode.Impulse);
+                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / _brickSize.y);
                  }
              }
 
              if (posicion.z < area.z - 1)
              {
                  ladrilloContinuo = bricks[posicion + new Vector3(0, 0, 1)];
-                 if (ladrilloContinuo != null)
+                 if (Vector3.Distance(ladrilloContinuo.transform.position, transform.position) < brickSize.z + 0.25f)
                  {
-                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.z);
+                     ladrilloContinuo.GetComponent<Rigidbody>().AddForce(fuerza, ForceMode.Impulse);
+                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / _brickSize.z);
                  }
              }
              if (posicion.z > 0)
              {
                  ladrilloContinuo = bricks[posicion + new Vector3(0, 0, -1)];
-                 if (ladrilloContinuo != null)
+                 if (Vector3.Distance(ladrilloContinuo.transform.position, transform.position) < brickSize.z + 0.25f)
                  {
-                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / brickSize.z);
+                     ladrilloContinuo.GetComponent<Rigidbody>().AddForce(fuerza, ForceMode.Impulse);
+                     PropagateImpact(ladrilloContinuo, fuerza / expansionOnda / _brickSize.z);
                  }
              }
 
@@ -225,14 +258,6 @@ public class BigWall : MonoBehaviour, IWall
          }
      }
 
-    void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
 
-        Gizmos.DrawSphere(bricks[new Vector3(0, 0, 0)].transform.position, 0.75f);
-
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawSphere(bricks[new Vector3(area.x-1, 0, 0)].transform.position, 0.75f);
-    }
 }
 

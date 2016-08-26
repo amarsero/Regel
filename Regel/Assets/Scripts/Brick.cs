@@ -14,7 +14,7 @@ public class Brick : MonoBehaviour {
     Rigidbody rigid;
     public Vector3 pos;
     IWall wallScript;
-
+    float mass;
 
 	// Use this for initialization
 	void Start () {
@@ -26,6 +26,7 @@ public class Brick : MonoBehaviour {
         wallScript = script;
         rigid = GetComponent<Rigidbody>();
         gameObject.tag = "Brick";
+        mass = rigid.mass;
     }
 
 
@@ -37,9 +38,9 @@ public class Brick : MonoBehaviour {
 
     void OnCollisionEnter(Collision col)
     {
-        if (col.impulse.magnitude > 10 && (col.gameObject.tag == "Ball" || col.gameObject.tag == "Brick"))
+        if (col.impulse.magnitude > 120 && (col.gameObject.tag == "Ball" || col.gameObject.tag == "Brick"))
         {
-            wallScript.CheckCollision(pos, col.impulse);
+            wallScript.CheckCollision(pos, col.relativeVelocity * mass);
             
         }
     }
