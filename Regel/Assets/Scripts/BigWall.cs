@@ -48,12 +48,40 @@ public class BigWall : MonoBehaviour, IWall
     /// </summary>
     /// <param name="doble">Doble longitud?</param>
     /// 
+    public void CrearColumna()
+    {
+        GameObject Cube;
+        Material Madera = Resources.Load("Materials/Wood", typeof(Material)) as Material;
+        FixedJoint fixedJointBase;
+        bricks = new Dictionary<Vector3, GameObject>();
+
+        _brickSize = new Vector3(1.5f, 0.375f, 0.75f); //x = 2*z = 4*y    
+        area = new Vector3(1, 8, 1); //In Bricks size. //Unidad ocupa 6*3*0.75(precario)
+
+        for (int i = 0; i < area.y; i++)
+        {
+              Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+              Cube.transform.localScale = _brickSize + new Vector3(-_brickSize.z,0,0);
+              Cube.transform.position = new Vector3(0, _brickSize.y / 2 + i * _brickSize.y, 0);
+              Cube.transform.parent = transform;
+              Cube.transform.rotation = transform.rotation;
+              Cube.GetComponent<BoxCollider>().material = materialFisico;
+              Cube.GetComponent<MeshRenderer>().material = Madera;
+              Cube.AddComponent<Rigidbody>().mass = 100 * _brickSize.x * _brickSize.y * _brickSize.z;
+              bricks.Add(new Vector3(0, i, 0), Cube);
+              if (i > 0)
+              {
+                  fixedJointBase = bricks[new Vector3(0, i, 0)].AddComponent<FixedJoint>();
+                  fixedJointBase.connectedBody = bricks[new Vector3(0, i - 1, 0)].GetComponent<Rigidbody>();
+                  fixedJointBase.breakForce = 800; //Esto en 10000 crea filas
+
+              }
+        }
+
+
+    }
 
     public void CrearPared(bool doble)
-    {
-        CrearPared(doble, Signos.Ninguno);
-    }
-    public void CrearPared(bool doble, Signos signo)
     {
         //Variables temporales
         GameObject Cube;
@@ -63,7 +91,7 @@ public class BigWall : MonoBehaviour, IWall
 
         //Definición de variables de la clase globales
         _brickSize = new Vector3(1.5f, 0.375f, 0.75f); //x = 2*z = 4*y    
-        area = new Vector3(4, 8, 1); //In Bricks size. //Unidad ocupa 6*3*0.75
+        area = new Vector3(4, 8, 1); //In Bricks size. //Unidad ocupa 6*3*0.75(precario)
         if (doble) area.x *= 2;
         expansionOnda = 4; //Cuanto más chico, más expansion
         bricks = new Dictionary<Vector3, GameObject>();
@@ -81,30 +109,22 @@ public class BigWall : MonoBehaviour, IWall
                     posicion = new Vector3(-area.x * _brickSize.x / 2 + _brickSize.x * 3/ 4 + i * _brickSize.x, _brickSize.y / 2 + j * _brickSize.y,
                                             -area.z * _brickSize.z / 2 + _brickSize.z / 2 + k * _brickSize.z);
                     Cube.transform.localPosition = posicion;
+
                     if ((j % 2) == 0)
                     {
-                        Cube.transform.localPosition += new Vector3(-_brickSize.x / 2, 0, 0);
-                        if (i==0 && signo.Equals(Signos.Este))
+                        Cube.transform.localPosition += new Vector3(-_brickSize.z, 0, 0);
+                        if (i == 0)
                         {
-                            Cube.transform.localPosition += new Vector3(BigWall.brickSize.y, 0, 0);
-                            Cube.transform.localScale += new Vector3(-BigWall.brickSize.x / 2, 0, 0);
-                        }
-                        if (i == (area.x-1) && signo.Equals(Signos.Sur))
-                        {
-                            Cube.transform.localPosition += new Vector3(BigWall.brickSize.y, 0, 0);
-                            //Cube.transform.localScale += new Vector3(BigWall.brickSize., 0, 0);
+                            Cube.transform.localScale  += new Vector3(-_brickSize.z, 0, 0);
+                            Cube.transform.localPosition += new Vector3(_brickSize.y, 0, 0);
                         }
 
                     }
-                    else if (i == 0 && signo.Equals(Signos.Este))
+
+                    else if (i == (area.x - 1))
                     {
-                        Cube.transform.localPosition += new Vector3(-BigWall.brickSize.y, 0, 0);
-                        Cube.transform.localScale += new Vector3(BigWall.brickSize.x / 2, 0, 0);
-                    }
-                    else if (i == (area.x - 1) && signo.Equals(Signos.Sur))
-                    {
-                        Cube.transform.localPosition += new Vector3(-BigWall.brickSize.y, 0, 0);
-                        //Cube.transform.localScale += new Vector3(-BigWall.brickSize.y, 0, 0);
+                        Cube.transform.localScale += new Vector3(-_brickSize.z, 0, 0);
+                        Cube.transform.localPosition += new Vector3(-_brickSize.y, 0, 0);
                     }
 
 
@@ -258,6 +278,13 @@ public class BigWall : MonoBehaviour, IWall
          }
      }
 
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawSphere(PrimerosLadrillos()[0].transform.position, 0.5f);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(UltimosLadrillos()[0].transform.position, 0.5f);
+    }
 
 }
 
