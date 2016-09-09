@@ -18,7 +18,7 @@ public class Ball : MonoBehaviour {
 	void FixedUpdate ()
     {
        //rigid.AddExplosionForce(2500, ExplosionPoint, 5); 8K
-       rigid.AddExplosionForce(32000, ExplosionPoint, 5); // 18K
+       rigid.AddExplosionForce(50000, ExplosionPoint, 5); // 18K
        tiempoDeVida -= Time.deltaTime;
 
        if (tiempoDeVida <= 0)

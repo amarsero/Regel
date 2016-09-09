@@ -30,11 +30,16 @@ public class BigWall : MonoBehaviour, IWall
     }
     void Awake()
     {
+        _brickSize = new Vector3(1.5f, 0.375f, 0.75f); //x = 2*z = 4*y    
+        area = new Vector3(4, 8, 1); //In Bricks size. //Unidad ocupa 6*3*0.75(precario)
+        expansionOnda = 4; //Cuanto más chico, más expansion
+        bricks = new Dictionary<Vector3, GameObject>();
         
     }
     // Use this for initialization
     void Start()
     {
+
       
     }
 
@@ -53,11 +58,7 @@ public class BigWall : MonoBehaviour, IWall
         GameObject Cube;
         Material Madera = Resources.Load("Materials/Wood", typeof(Material)) as Material;
         FixedJoint fixedJointBase;
-        bricks = new Dictionary<Vector3, GameObject>();
-
-        _brickSize = new Vector3(1.5f, 0.375f, 0.75f); //x = 2*z = 4*y    
-        area = new Vector3(1, 8, 1); //In Bricks size. //Unidad ocupa 6*3*0.75(precario)
-
+        
         for (int i = 0; i < area.y; i++)
         {
               Cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -90,11 +91,6 @@ public class BigWall : MonoBehaviour, IWall
         FixedJoint fixedJointBase;
 
         //Definición de variables de la clase globales
-        _brickSize = new Vector3(1.5f, 0.375f, 0.75f); //x = 2*z = 4*y    
-        area = new Vector3(4, 8, 1); //In Bricks size. //Unidad ocupa 6*3*0.75(precario)
-        if (doble) area.x *= 2;
-        expansionOnda = 4; //Cuanto más chico, más expansion
-        bricks = new Dictionary<Vector3, GameObject>();
 
 
         for (float i = 0; i < area.x; i++) // X = Ancho
@@ -280,10 +276,6 @@ public class BigWall : MonoBehaviour, IWall
 
     void OnDrawGizmos()
     {
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawSphere(PrimerosLadrillos()[0].transform.position, 0.5f);
-        Gizmos.color = Color.blue;
-        Gizmos.DrawSphere(UltimosLadrillos()[0].transform.position, 0.5f);
     }
 
 }

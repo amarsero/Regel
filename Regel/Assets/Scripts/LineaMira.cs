@@ -57,7 +57,7 @@ public class LineaMira : MonoBehaviour {
         {
             //Squirly.y =  2 * Mathf.Sin(Mathf.Deg2Rad * i * 30f);
             //Squirly.x =  2 * Mathf.Cos(Mathf.Deg2Rad * i * 30f);
-            targetPosition = Quaternion.Euler(-i / 10f, 0, 0) * Vector3.back *  i/5;
+            targetPosition = Quaternion.Euler(i / 10f, 0, 0) * Vector3.forward *  i/5;
             Linea.SetPosition(i, targetPosition);
             if (Physics.CheckSphere(transform.position + transform.rotation * (targetPosition + new Vector3(0, 0, 0.15f)), 0.05f))
 	        {
@@ -85,8 +85,5 @@ public class LineaMira : MonoBehaviour {
     }
     void OnDrawGizmosSelected()
     {
-        // Show Ball Spawn Point
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position + transform.rotation * (targetPosition + new Vector3(0, 0, 0.15f)), 0.05f);
     }
 }
