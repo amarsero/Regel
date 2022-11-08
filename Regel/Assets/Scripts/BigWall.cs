@@ -31,7 +31,7 @@ public class BigWall : MonoBehaviour, IWall
     void Awake()
     {
         _brickSize = new Vector3(1.5f, 0.375f, 0.75f); //x = 2*z = 4*y    
-        area = new Vector3(4, 8, 1); //In Bricks size. //Unidad ocupa 6*3*0.75(precario)
+        area = new Vector3(4, 16, 1); //In Bricks size. //Unidad ocupa 6*3*0.75(precario)
         expansionOnda = 4; //Cuanto más chico, más expansion
         bricks = new Dictionary<Vector3, GameObject>();
         

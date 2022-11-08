@@ -1,4 +1,7 @@
-﻿Shader "Custom/LambertShader"
+﻿// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
+Shader "Custom/LambertShader"
 {
 	Properties 
 	{
@@ -36,7 +39,7 @@
 			{
 				fragInput o;
 
-				float3 normalDirection = normalize (mul(float4(v.normal,0.0), _World2Object).xyz);
+				float3 normalDirection = normalize (mul(float4(v.normal,0.0), unity_WorldToObject).xyz);
 				float3 lightDirection;
 				float atten = 1.0;
 
@@ -46,7 +49,7 @@
 				float3 lightFinal = diffuseReflection + UNITY_LIGHTMODEL_AMBIENT.xyz;
 
 				o.col = float4(lightFinal * _Color.rgb,1.0);
-				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+				o.pos = UnityObjectToClipPos(v.vertex);
 
 
 
